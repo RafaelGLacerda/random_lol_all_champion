@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Times - League of Legends</title>
+    <style>
+        body {
+            background-color: #2C3E50;
+            color: #ECF0F1;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #34495E;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1ABC9C;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        select, input[type="checkbox"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            background-color: #34495E;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #1ABC9C;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #16A085;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #2C3E50;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-box p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .scrollable {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gerador de Posições, Campeões e Builds</h1>
+
+        <label for="num-jogadores">Escolha o número de jogadores (1-10):</label>
+        <select id="num-jogadores">
+            <!-- Gera opções de 1 a 10 -->
+            <script>
+                for (let i = 1; i <= 10; i++) {
+                    document.write(`<option value="${i}">${i}</option>`);
+                }
+            </script>
+        </select>
+
+        <label><input type="checkbox" id="random-champ"> Campeão</label>
+        <label><input type="checkbox" id="random-rune"> Runa</label>
+        <label><input type="checkbox" id="random-lane"> Lane</label>
+        <label><input type="checkbox" id="random-build"> Build</label>
+
+        <button onclick="generateRoles()">Gerar</button>
+
+        <div class="result-box">
+            <div class="scrollable" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const champions = [
+            "Aatrox", "Ahri", "Akali", "Alistar", "Amumu", "Anivia", "Annie", "Aphelios", "Ashe", 
+            "Aurelion Sol", "Azir", "Bard", "Bel'Veth", "Blitzcrank", "Brand", "Braum", "Caitlyn", 
+            "Camille", "Cassiopeia", "Cho'Gath", "Corki", "Darius", "Diana", "Dr. Mundo", "Draven", 
+            "Ekko", "Elise", "Evelynn", "Ezreal", "Fiddlesticks", "Fiora", "Fizz", "Galio", 
+            "Gangplank", "Garen", "Gnar", "Gragas", "Graves", "Gwen", "Hecarim", "Heimerdinger", 
+            "Illaoi", "Irelia", "Ivern", "Janna", "Jarvan IV", "Jax", "Jayce", "Jhin", "Jinx", 
+            "K'Sante", "Kai'Sa", "Kalista", "Karma", "Karthus", "Kassadin", "Katarina", "Kayle", 
+            "Kayn", "Kennen", "Kha'Zix", "Kindred", "Kled", "Kog'Maw", "LeBlanc", "Lee Sin", 
+            "Leona", "Lillia", "Lissandra", "Lucian", "Lulu", "Lux", "Malphite", "Malzahar", 
+            "Maokai", "Master Yi", "Milio", "Miss Fortune", "Mordekaiser", "Morgana", "Nami", 
+            "Nasus", "Nautilus", "Neeko", "Nidalee", "Nilah", "Nocturne", "Nunu & Willump", 
+            "Olaf", "Orianna", "Ornn", "Pantheon", "Poppy", "Pyke", "Qiyana", "Quinn", "Rakan", 
+            "Rammus", "Rek'Sai", "Rell", "Renata Glasc", "Renekton", "Rengar", "Riven", "Rumble", 
+            "Ryze", "Samira", "Sejuani", "Senna", "Seraphine", "Sett", "Shaco", "Shen", 
+            "Shyvana", "Singed", "Sion", "Sivir", "Skarner", "Sona", "Soraka", "Swain", 
+            "Sylas", "Syndra", "Tahm Kench", "Taliyah", "Talon", "Taric", "Teemo", "Thresh", 
+            "Tristana", "Trundle", "Tryndamere", "Twisted Fate", "Twitch", "Udyr", "Urgot", 
+            "Varus", "Vayne", "Veigar", "Vel'Koz", "Vex", "Vi", "Viego", "Viktor", "Vladimir", 
+            "Volibear", "Warwick", "Wukong", "Xayah", "Xerath", "Xin Zhao", "Yasuo", "Yone", 
+            "Yorick", "Yuumi", "Zac", "Zed", "Zeri", "Ziggs", "Zilean", "Zoe", "Zyra"
+        ];
+
+        const runes = [
+            "Pressione o Ataque", "Ritmo Fatal", "Agilidade nos Pés", "Conquistador",
+            "Eletrocutar", "Predador", "Colheita Sombria", "Chuva de Lâminas",
+            "Ímpeto Gradual", "Cometa Arcano", "Invocar Aery",
+            "Aperto dos Mortos-Vivos", "Pós-choque", "Guardião",
+            "Aprimoramento Glacial", "Cleptomancia", "Livro de Feitiços Deslacrado"
+        ];
+
+        const lanes = ["Top", "Jungle", "Mid", "ADC", "Support"];
+
+        const builds = ["Tank", "Letalidade", "Crítico", "AP"];
+
+        function generateRoles() {
+            const numPlayers = document.getElementById('num-jogadores').value;
+            const randomizeChamp = document.getElementById('random-champ').checked;
+            const randomizeRune = document.getElementById('random-rune').checked;
+            const randomizeLane = document.getElementById('random-lane').checked;
+            const randomizeBuild = document.getElementById('random-build').checked;
+            
+            let resultText = "";
+
+            for (let i = 1; i <= numPlayers; i++) {
+                resultText += `<strong>Jogador ${i}:</strong><br>`;
+
+                if (randomizeChamp) {
+                    const champ = champions[Math.floor(Math.random() * champions.length)];
+                    resultText += `Campeão: ${champ}<br>`;
+                }
+
+                if (randomizeRune) {
+                    const rune = runes[Math.floor(Math.random() * runes.length)];
+                    resultText += `Runa: ${rune}<br>`;
+                }
+
+                if (randomizeLane) {
+                    const lane = lanes[Math.floor(Math.random() * lanes.length)];
+                    resultText += `Lane: ${lane}<br>`;
+                }
+
+                if (randomizeBuild) {
+                    const build = builds[Math.floor(Math.random() * builds.length)];
+                    resultText += `Build: ${build}<br>`;
+                }
+
+                resultText += "<br>";
+            }
+
+            document.getElementById('result').innerHTML = resultText;
+        }
+    </script>
+
+</body>
+</html>
